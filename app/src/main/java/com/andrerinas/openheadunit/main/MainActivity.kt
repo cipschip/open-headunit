@@ -627,11 +627,19 @@ class MainActivity : BaseActivity() {
     }
 
     private fun hideAutoConnectOverlay() {
-        val overlay = findViewById<View>(R.id.auto_connect_loading_overlay) ?: return
-        if (overlay.visibility != View.VISIBLE) return
+    val overlay = findViewById<View>(R.id.auto_connect_loading_overlay) ?: return
+    if (overlay.visibility != View.VISIBLE) return
 
-        // Stop video FIRST — VideoView's SurfaceView ignores parent alpha animations
-        // and would otherwise stay visible during the fade-out.
+    val hasCustomVideo = App.provide(this).settings.loadingScreenMediaType == "video"
+    // Wait 2.6 seconds for your Skoda video to finish playing its audio/animation
+    val delayTime = if (hasCustomVideo) 2600L else 0L
+
+    lifecycleScope.launch(Dispatchers.Main) {
+        if (delayTime > 0) {
+            kotlinx.coroutines.delay(delayTime)
+        }
+
+        // Stop video and clear views AFTER the delay
         stopAutoConnectVideo()
         autoConnectKenBurnsAnim?.cancel()
         autoConnectKenBurnsAnim = null
@@ -639,7 +647,6 @@ class MainActivity : BaseActivity() {
         findViewById<View>(R.id.auto_connect_loading_custom_image)?.visibility = View.GONE
         findViewById<View>(R.id.auto_connect_loading_custom_text_overlay)?.visibility = View.GONE
 
-        val hasCustomVideo = App.provide(this).settings.loadingScreenMediaType == "video"
         if (hasCustomVideo) {
             overlay.visibility = View.GONE
         } else {
@@ -653,7 +660,7 @@ class MainActivity : BaseActivity() {
                 .start()
         }
     }
-
+}
     private fun stopAutoConnectVideo() {
         findViewById<VideoView>(R.id.auto_connect_loading_custom_video)?.let {
             try {
