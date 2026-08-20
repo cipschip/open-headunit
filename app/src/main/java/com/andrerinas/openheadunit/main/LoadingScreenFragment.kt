@@ -680,32 +680,54 @@ class LoadingScreenFragment : Fragment() {
     }
 
     private fun setupFullscreenVideo(file: File) {
-        try {
-            val surfaceView = SurfaceView(requireContext())
-            surfaceView.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
+    try {
+        val surfaceView = SurfaceView(requireContext())
+        surfaceView.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        fullscreenOverlay?.addView(surfaceView, 0)
+
+        // Fixed: Explicitly declare audio attributes so Android doesn't drop or mute the stream
+        val mp = MediaPlayer().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
             )
-            fullscreenOverlay?.addView(surfaceView, 0)
+        }
+        fullscreenMediaPlayer = mp
+        mp.setDataSource(file.absolutePath)
+        mp.isLooping = settings.loadingScreenLoopVideo
+        mp.setVolume(1f, 1f)
 
-            val mp = MediaPlayer()
-            fullscreenMediaPlayer = mp
-            mp.setDataSource(file.absolutePath)
-            mp.isLooping = settings.loadingScreenLoopVideo
-            mp.setVolume(1f, 1f)
+        surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                try {
+                    mp.setDisplay(holder)
+                    mp.prepareAsync()
+                } catch (_: Exception) {}
+            }
+            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+            override fun surfaceDestroyed(holder: SurfaceHolder) {
+                try { mp.setDisplay(null) } catch (_: Exception) {}
+            }
+        })
 
-            surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
-                override fun surfaceCreated(holder: SurfaceHolder) {
-                    try {
-                        mp.setDisplay(holder)
-                        mp.prepareAsync()
-                    } catch (_: Exception) {}
-                }
-                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
-                override fun surfaceDestroyed(holder: SurfaceHolder) {
-                    try { mp.setDisplay(null) } catch (_: Exception) {}
-                }
-            })
+        mp.setOnPreparedListener { player ->
+            applyFullscreenScale()
+            player.start()
+        }
+        mp.setOnErrorListener { _, _, _ ->
+            AppLog.e("Fullscreen video error")
+            true
+        }
+    } catch (e: Exception) {
+        AppLog.e("Video setup failed: ${e.message}")
+    }
+}
+```[cite: 4]
 
             mp.setOnPreparedListener { player ->
                 applyFullscreenScale()
