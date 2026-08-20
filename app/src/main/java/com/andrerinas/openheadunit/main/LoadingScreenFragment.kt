@@ -1,6 +1,7 @@
 package com.andrerinas.openheadunit.main
 
 import android.animation.ObjectAnimator
+import android.media.AudioAttributes
 import android.animation.PropertyValuesHolder
 import android.media.MediaPlayer
 import android.net.Uri
