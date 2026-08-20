@@ -569,10 +569,7 @@ class MainActivity : BaseActivity() {
                     customVideo?.setOnPreparedListener { mp ->
                         mp.isLooping = settings.loadingScreenLoopVideo
                         mp.setVolume(1f, 1f)
-                    customVideo?.setOnCompletionListener { mp ->
-                        // Keeps volume locked until the very end of the animation
-                        mp.setVolume(1f, 1f)
-                    }
+
                         try {
                             val vw = mp.videoWidth
                             val vh = mp.videoHeight
@@ -663,7 +660,7 @@ class MainActivity : BaseActivity() {
                 .start()
         }
     }
-
+}
     private fun stopAutoConnectVideo() {
         findViewById<VideoView>(R.id.auto_connect_loading_custom_video)?.let {
             try {
