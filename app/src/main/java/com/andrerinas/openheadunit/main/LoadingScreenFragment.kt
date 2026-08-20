@@ -692,7 +692,7 @@ class LoadingScreenFragment : Fragment() {
             fullscreenMediaPlayer = mp
             mp.setDataSource(file.absolutePath)
             mp.isLooping = settings.loadingScreenLoopVideo
-            mp.setVolume(0f, 0f)
+            mp.setVolume(1f, 1f)
 
             surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
                 override fun surfaceCreated(holder: SurfaceHolder) {
