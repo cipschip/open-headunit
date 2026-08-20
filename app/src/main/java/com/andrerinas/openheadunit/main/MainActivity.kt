@@ -557,7 +557,7 @@ class MainActivity : BaseActivity() {
                     customVideo?.setVideoPath(file.absolutePath)
                     customVideo?.setOnPreparedListener { mp ->
                         mp.isLooping = settings.loadingScreenLoopVideo
-                        mp.setVolume(0f, 0f)
+                        mp.setVolume(1f, 1f)
 
                         try {
                             val vw = mp.videoWidth
