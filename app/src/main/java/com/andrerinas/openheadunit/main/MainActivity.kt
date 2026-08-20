@@ -554,6 +554,17 @@ class MainActivity : BaseActivity() {
                 "video" -> {
                     customImage?.visibility = View.GONE
                     customVideo?.visibility = View.VISIBLE
+                    
+                    // Put it HERE so it applies before the video loads
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        customVideo?.setAudioAttributes(
+                            android.media.AudioAttributes.Builder()
+                                .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MOVIE)
+                                .build()
+                        )
+                    }
+
                     customVideo?.setVideoPath(file.absolutePath)
                     customVideo?.setOnPreparedListener { mp ->
                         mp.isLooping = settings.loadingScreenLoopVideo
